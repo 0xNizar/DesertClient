@@ -1,9 +1,21 @@
-import { Client, GatewayIntentBits, REST, Routes } from 'discord.js';
+import { Client, Collection, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
+import fs from "fs";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+interface Command {
+  data: SlashCommandBuilder;
+  execute: (...args: any[]) => void;
+}
+
+interface ExtendedClient extends Client {
+  slashCommands: Collection<string, Command>;
+}
+
+const client: ExtendedClient = new Client({ intents: [GatewayIntentBits.Guilds] }) as ExtendedClient;
+
+client.slashCommands = new Collection();
 
 client.on('ready', () => {
   if (client.user) {
@@ -13,11 +25,18 @@ client.on('ready', () => {
   }
 });
 
-const commands = [
-  {
-    name: 'ping',
-    description: 'Replies with Pong!',
-  },
+const slashCommands = fs.readdirSync("./slashCommands");
+
+for (const module of slashCommands) {
+	const commandFiles = fs.readdirSync(`./slashCommands/${module}`);
+	for (const commandFile of commandFiles) {
+		const command = require(`./slashCommands/${module}/${commandFile}`).default;
+		client.slashCommands.set(command.data.name, command);
+	}
+}
+
+const commandJsonData = [
+	...Array.from(client.slashCommands.values()).map((command) => command.data.toJSON()),
 ];
 
 const rest = new REST({ version: '10' }).setToken(process.env.clientToken!);
@@ -26,7 +45,7 @@ const rest = new REST({ version: '10' }).setToken(process.env.clientToken!);
   try {
     console.log('Started refreshing application (/) commands.');
 
-    await rest.put(Routes.applicationCommands(process.env.clientID!), { body: commands });
+    await rest.put(Routes.applicationCommands(process.env.clientID!), { body: commandJsonData });
 
     console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
