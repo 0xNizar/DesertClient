@@ -1,21 +1,11 @@
 import { Client, Collection, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from 'discord.js';
+import { Desert } from "./client/Desert";
 import fs from "fs";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-interface Command {
-  data: SlashCommandBuilder;
-  execute: (...args: any[]) => void;
-}
-
-interface ExtendedClient extends Client {
-  slashCommands: Collection<string, Command>;
-}
-
-const client: ExtendedClient = new Client({ intents: [GatewayIntentBits.Guilds] }) as ExtendedClient;
-
-client.slashCommands = new Collection();
+const client = new Desert();
 
 client.on('ready', () => {
   if (client.user) {
