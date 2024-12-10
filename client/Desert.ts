@@ -1,4 +1,6 @@
 import { Client, GatewayIntentBits, SlashCommandBuilder, Collection } from 'discord.js';
+import { EventsHandler } from "./handlers/EventsHandler";
+import { SlashCommand } from './handlers/SlashCommand';
 
 interface Command {
     data: SlashCommandBuilder;
@@ -7,6 +9,7 @@ interface Command {
 
 export class Desert extends Client {
     public slashCommands: Collection<string, Command>;
+    public eventHnadler: any;
 
     constructor() {
         super({
@@ -14,5 +17,10 @@ export class Desert extends Client {
         });
 
         this.slashCommands = new Collection();
+    }
+
+    connect = () => {
+        EventsHandler();
+        SlashCommand();
     }
 }
