@@ -4,7 +4,7 @@ import fs from "fs";
 import dotenv from "dotenv";
 
 export async function SlashCommand() {
-    dotenv.config({ path: "../../" });
+    dotenv.config();
 
     const slashCommands = fs.readdirSync("././slashCommands");
 

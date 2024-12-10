@@ -2,6 +2,9 @@ import { Client, GatewayIntentBits, SlashCommandBuilder, Collection } from 'disc
 import { EventsHandler } from "./handlers/EventsHandler";
 import { SlashCommand } from './handlers/SlashCommand';
 
+import dotenv from "dotenv";
+
+
 interface Command {
     data: SlashCommandBuilder;
     execute: (...args: any[]) => void;
@@ -22,5 +25,8 @@ export class Desert extends Client {
     connect = () => {
         EventsHandler();
         SlashCommand();
+        
+        dotenv.config();
+        this.login(process.env.clientToken);
     }
 }
